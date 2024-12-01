@@ -1,6 +1,7 @@
 pub fn solve() {
     let input = std::fs::read_to_string("inputs/day01.txt").unwrap();
 
+    println!("===== DAY 01 =====");
     part1(&input);
     part2(&input);
 }
@@ -9,8 +10,11 @@ fn part1(input: &str) {
     let (mut v1, mut v2): (Vec<i32>, Vec<i32>) = input
         .lines()
         .map(|line| {
-            let s = line.split_whitespace().collect::<Vec<&str>>();
-            (s[0].parse::<i32>().unwrap(), s[1].parse::<i32>().unwrap())
+            let s = line
+                .split_whitespace()
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>();
+            (s[0], s[1])
         })
         .unzip();
 
@@ -22,7 +26,7 @@ fn part1(input: &str) {
         .zip(v2)
         .fold(0, |acc, (&l, r)| acc + (l - r).abs());
 
-    println!("Part01: {res}");
+    println!("Part 1: {res}");
 }
 
 fn part2(input: &str) {
@@ -33,10 +37,13 @@ fn part2(input: &str) {
     let v: Vec<i32> = input
         .lines()
         .map(|line| {
-            let s = line.split_whitespace().collect::<Vec<&str>>();
-            let occur = map.entry(s[1].parse::<i32>().unwrap()).or_insert(0);
+            let s = line
+                .split_whitespace()
+                .map(|s| s.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>();
+            let occur = map.entry(s[1]).or_insert(0);
             *occur += 1;
-            s[0].parse::<i32>().unwrap()
+            s[0]
         })
         .collect();
 
@@ -44,5 +51,5 @@ fn part2(input: &str) {
         .iter()
         .fold(0, |acc, &v| acc + v * (*map.get(&v).unwrap_or(&0)));
 
-    println!("Part02: {res}");
+    println!("Part 2: {res}");
 }
