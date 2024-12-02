@@ -20,8 +20,8 @@ fn part1(input: &str) -> i32 {
         })
         .unzip();
 
-    v1.sort();
-    v2.sort();
+    v1.sort_unstable();
+    v2.sort_unstable();
 
     v1.iter().zip(v2).map(|(&l, r)| (l - r).abs()).sum()
 }
