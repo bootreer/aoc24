@@ -24,14 +24,12 @@ fn safe(level: &[i32]) -> bool {
     a || b
 }
 
-fn part1(input: &str) -> String {
-    let res = to_iter(input).filter(|l| safe(l)).count();
-
-    format!("{res}")
+fn part1(input: &str) -> usize {
+    to_iter(input).filter(|l| safe(l)).count()
 }
 
-fn part2(input: &str) -> String {
-    let res = to_iter(input)
+fn part2(input: &str) -> usize {
+    to_iter(input)
         .filter(|l| {
             let mut b = false;
             for i in 0..l.len() {
@@ -41,8 +39,7 @@ fn part2(input: &str) -> String {
             }
             b
         })
-        .count();
-    format!("{res}")
+        .count()
 }
 
 #[allow(dead_code)]
@@ -57,11 +54,11 @@ mod test {
 
     #[test]
     fn part1() {
-        assert_eq!(super::part1(INPUT), String::from("2"));
+        assert_eq!(super::part1(INPUT), 2);
     }
 
     #[test]
     fn part2() {
-        assert_eq!(super::part2(INPUT), String::from("2"));
+        assert_eq!(super::part2(INPUT), 4);
     }
 }
