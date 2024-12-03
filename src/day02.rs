@@ -6,7 +6,7 @@ pub fn solve() {
     println!("Part 2: {}", part2(&input));
 }
 
-fn to_iter(input: &str) -> impl Iterator<Item = Vec<i32>> + use<'_> {
+fn to_iter(input: &str) -> impl Iterator<Item = Vec<i32>> + '_ {
     input.lines().map(|line| {
         line.split_whitespace()
             .map(|s| s.parse::<i32>().unwrap())
@@ -35,16 +35,16 @@ fn part2(input: &str) -> usize {
             for i in 0..l.len() {
                 let mut l = l.clone();
                 l.remove(i);
-                b = b || safe(&l);
+                b |= safe(&l);
             }
             b
         })
         .count()
 }
 
-#[allow(dead_code)]
 mod test {
 
+    #[allow(unused)]
     static INPUT: &str = "7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
