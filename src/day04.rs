@@ -40,7 +40,6 @@ fn part1(input: &str) -> usize {
                 chars[i + 2][j + 2],
                 chars[i + 3][j + 3],
             ];
-
             let bot = [
                 chars[i + 3][j],
                 chars[i + 2][j + 1],
@@ -48,11 +47,9 @@ fn part1(input: &str) -> usize {
                 chars[i][j + 3],
             ];
 
-            if matches!(top, ['X', 'M', 'A', 'S'] | ['S', 'A', 'M', 'X']) {
-                diag += 1;
-            }
-
-            if matches!(bot, ['X', 'M', 'A', 'S'] | ['S', 'A', 'M', 'X']) {
+            if matches!(top, ['X', 'M', 'A', 'S'] | ['S', 'A', 'M', 'X'])
+                || matches!(bot, ['X', 'M', 'A', 'S'] | ['S', 'A', 'M', 'X'])
+            {
                 diag += 1;
             }
         }
@@ -61,7 +58,7 @@ fn part1(input: &str) -> usize {
     diag + vert + hor
 }
 
-fn part2(input: &str) -> u32 {
+fn part2(input: &str) -> usize {
     let chars: Vec<Vec<_>> = input.lines().map(|l| l.chars().collect()).collect();
 
     let mut acc = 0;
