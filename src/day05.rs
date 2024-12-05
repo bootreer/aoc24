@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 pub fn solve() {
     let input = std::fs::read_to_string("inputs/day05.txt").unwrap();
 
-    println!("===== DAY 01 =====");
+    println!("===== DAY 05 =====");
     println!("Part 1: {}", part1(&input));
     println!("Part 2: {}", part2(&input));
 }
