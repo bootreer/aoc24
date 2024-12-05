@@ -10,35 +10,28 @@ pub fn solve() {
     println!("Part 2: {}", part2(&input));
 }
 
-fn check_valid(update: &[u32], order: &HashMap<u32, HashSet<u32>>) -> bool {
-    let update_idx: HashMap<u32, Vec<usize>> =
-        update
-            .iter()
-            .copied()
-            .enumerate()
-            .fold(HashMap::new(), |mut map, (i, v)| {
-                map.entry(v).or_default().push(i);
-                map
-            });
-
-    // bruteforcey
-    for (i, v) in update.iter().enumerate() {
-        let afters = order.get(v);
-        let valid = afters
-            .map(|set| {
-                set.iter()
-                    .map(|a| update_idx.get(a))
-                    .map(|v| v.map(|v| v.iter().all(|&idx| i < idx)).unwrap_or(true))
-                    .all(|b| b)
-            })
-            .unwrap_or(true);
-
-        if !valid {
-            return false;
-        }
+fn cmp(l: &u32, r: &u32, orderings: &HashMap<u32, HashSet<u32>>) -> Ordering {
+    if orderings
+        .get(l)
+        .map(|post| post.get(r).is_some())
+        .unwrap_or_default()
+    {
+        return Ordering::Less;
     }
 
-    true
+    if orderings
+        .get(r)
+        .map(|post| post.get(l).is_some())
+        .unwrap_or_default()
+    {
+        return Ordering::Greater;
+    }
+
+    Ordering::Equal
+}
+
+fn check_valid(update: &[u32], order: &HashMap<u32, HashSet<u32>>) -> bool {
+    update.is_sorted_by(|l, r| cmp(l, r, order) != Ordering::Greater)
 }
 
 #[allow(clippy::type_complexity)]
@@ -74,25 +67,7 @@ fn part2(input: &str) -> u32 {
     invalid
         .iter_mut()
         .map(|u| {
-            u.sort_by(|l, r| {
-                if map
-                    .get(l)
-                    .map(|post| post.get(r).is_some())
-                    .unwrap_or_default()
-                {
-                    return Ordering::Less;
-                }
-
-                if map
-                    .get(r)
-                    .map(|post| post.get(l).is_some())
-                    .unwrap_or_default()
-                {
-                    return Ordering::Greater;
-                }
-
-                Ordering::Equal
-            });
+            u.sort_by(|l, r| cmp(l, r, &map));
             u
         })
         .map(|u| u[u.len() / 2])
