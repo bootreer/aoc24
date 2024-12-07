@@ -6,7 +6,7 @@ pub fn solve() {
     println!("Part 2: {}", part2(&input));
 }
 
-fn check(res: i64, vals: &[i64]) -> bool {
+fn check(res: i64, vals: &[i64], concat: bool) -> bool {
     if res < 0 {
         return false;
     }
@@ -14,30 +14,19 @@ fn check(res: i64, vals: &[i64]) -> bool {
         [] => res == 0,
         [..] => {
             let (last, rest) = vals.split_last().unwrap();
-            (res % last == 0 && check(res / last, rest)) || check(res - last, rest)
+
+            let concat_res = concat && {
+                let t = 10i64.pow(last.ilog10() + 1);
+                (*last == res % t) && check(res / t, rest, concat)
+            };
+
+            (res % last == 0 && check(res / last, rest, concat))
+                || check(res - last, rest, concat)
+                || concat_res
         }
     }
 }
 
-fn check_concat(res: i64, vals: &[i64]) -> bool {
-    if res < 0 {
-        return false;
-    }
-    match *vals {
-        [] => res == 0,
-        [..] => {
-            let (last, rest) = vals.split_last().unwrap();
-            let t = 10i64.pow(last.ilog10() + 1);
-
-            let div = res % last == 0 && check_concat(res / last, rest);
-            let concat = (*last == res % t) && check_concat(res / t, rest);
-
-            div || concat || check_concat(res - last, rest)
-        }
-    }
-}
-
-#[allow(clippy::type_complexity)]
 fn parse_input(input: &str) -> impl Iterator<Item = (i64, Vec<i64>)> + '_ {
     input.lines().map(|l| {
         let l: Vec<_> = l.split(":").collect();
@@ -52,14 +41,14 @@ fn parse_input(input: &str) -> impl Iterator<Item = (i64, Vec<i64>)> + '_ {
 
 fn part1(input: &str) -> i64 {
     parse_input(input)
-        .filter(|(res, vals)| check(*res, vals))
+        .filter(|(res, vals)| check(*res, vals, false))
         .map(|v| v.0)
         .sum()
 }
 
 fn part2(input: &str) -> i64 {
     parse_input(input)
-        .filter(|(res, vals)| check_concat(*res, vals))
+        .filter(|(res, vals)| check(*res, vals, true))
         .map(|v| v.0)
         .sum()
 }
