@@ -10,47 +10,44 @@ fn check(res: i64, vals: &[i64], concat: bool) -> bool {
     if res < 0 {
         return false;
     }
-    match *vals {
+    match vals {
         [] => res == 0,
-        [..] => {
-            let (last, rest) = vals.split_last().unwrap();
-
-            let concat_res = concat && {
+        [rest @ .., last] => {
+            let c = concat && {
                 let t = 10i64.pow(last.ilog10() + 1);
                 (*last == res % t) && check(res / t, rest, concat)
             };
 
             (res % last == 0 && check(res / last, rest, concat))
                 || check(res - last, rest, concat)
-                || concat_res
+                || c
         }
     }
 }
 
-fn parse_input(input: &str) -> impl Iterator<Item = (i64, Vec<i64>)> + '_ {
-    input.lines().map(|l| {
-        let l: Vec<_> = l.split(":").collect();
-        (
-            l[0].parse::<i64>().unwrap(),
-            l[1].split_whitespace()
-                .map(|n| n.parse().unwrap())
-                .collect::<Vec<i64>>(),
-        )
-    })
+fn parse_input(input: &str, concat: bool) -> i64 {
+    input
+        .lines()
+        .map(|l| {
+            let l: Vec<_> = l.split(":").collect();
+            (
+                l[0].parse::<i64>().unwrap(),
+                l[1].split_whitespace()
+                    .map(|n| n.parse().unwrap())
+                    .collect::<Vec<i64>>(),
+            )
+        })
+        .filter(|(res, vals)| check(*res, vals, concat))
+        .map(|v| v.0)
+        .sum()
 }
 
 fn part1(input: &str) -> i64 {
-    parse_input(input)
-        .filter(|(res, vals)| check(*res, vals, false))
-        .map(|v| v.0)
-        .sum()
+    parse_input(input, false)
 }
 
 fn part2(input: &str) -> i64 {
-    parse_input(input)
-        .filter(|(res, vals)| check(*res, vals, true))
-        .map(|v| v.0)
-        .sum()
+    parse_input(input, true)
 }
 
 mod test {
