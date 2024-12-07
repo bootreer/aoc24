@@ -12,6 +12,7 @@ fn check(res: i64, vals: &[i64], concat: bool) -> bool {
     }
     match vals {
         [] => res == 0,
+        [..] if res == 0 => false,
         [rest @ .., last] => {
             let c = concat && {
                 let t = 10i64.pow(last.ilog10() + 1);
@@ -31,10 +32,10 @@ fn parse_input(input: &str, concat: bool) -> i64 {
         .map(|l| {
             let l: Vec<_> = l.split(":").collect();
             (
-                l[0].parse::<i64>().unwrap(),
+                l[0].parse().unwrap(),
                 l[1].split_whitespace()
                     .map(|n| n.parse().unwrap())
-                    .collect::<Vec<i64>>(),
+                    .collect::<Vec<_>>(),
             )
         })
         .filter(|(res, vals)| check(*res, vals, concat))
@@ -61,8 +62,7 @@ mod test {
 161011: 16 10 13
 192: 17 8 14
 21037: 9 7 18 13
-292: 11 6 16 20
-";
+292: 11 6 16 20";
 
     #[test]
     fn part1() {
