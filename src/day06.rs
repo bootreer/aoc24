@@ -21,7 +21,6 @@ enum Field {
     Obstruction,
     Guard(Direction),
     Empty,
-    Visited,
 }
 
 #[derive(Clone)]
@@ -88,10 +87,9 @@ fn parse_input(input: &str) -> (Vec<Vec<Field>>, Guard) {
     (map, guard)
 }
 
-fn part1(input: &str) -> (i32, HashSet<(usize, usize)>) {
-    let (mut map, mut guard) = parse_input(input);
+fn part1(input: &str) -> (usize, HashSet<(usize, usize)>) {
+    let (map, mut guard) = parse_input(input);
 
-    let mut acc = 1;
     let mut visited = HashSet::new();
     loop {
         let pos = guard.pos;
@@ -103,29 +101,20 @@ fn part1(input: &str) -> (i32, HashSet<(usize, usize)>) {
         };
 
         visited.insert((pos.0 as usize, pos.1 as usize));
-
         if !((0..map.len() as i32).contains(&next.0) && (0..map[0].len() as i32).contains(&next.1))
         {
             break;
         }
 
-        map[pos.0 as usize][pos.1 as usize] = Field::Visited;
-
         match map[next.0 as usize][next.1 as usize] {
             Field::Obstruction => guard.right(),
-            Field::Empty => {
-                map[next.0 as usize][next.1 as usize] = Field::Visited;
-                acc += 1;
+            _ => {
                 guard.pos = next;
             }
-            Field::Visited => {
-                guard.pos = next;
-            }
-            _ => unreachable!(),
         }
     }
 
-    (acc, visited)
+    (visited.len(), visited)
 }
 
 fn part2(input: &str) -> i32 {
@@ -165,11 +154,9 @@ fn part2(input: &str) -> i32 {
                     map[next.0 as usize][next.1 as usize] = Field::Guard(guard.direction);
                     guard.pos = next;
                 }
-                _ => unreachable!(),
             }
         }
     }
-    // }
 
     acc
 }
