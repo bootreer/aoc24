@@ -1,3 +1,4 @@
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 pub fn solve() {
@@ -117,48 +118,46 @@ fn part1(input: &str) -> (usize, HashSet<(usize, usize)>) {
     (visited.len(), visited)
 }
 
-fn part2(input: &str) -> i32 {
+fn part2(input: &str) -> usize {
     let visited = part1(input).1;
     let (map, guard) = parse_input(input);
 
-    let mut acc = 0;
+    visited
+        .into_par_iter()
+        .filter(|&(i, j)| {
+            let mut map = map.clone();
+            let mut guard = guard.clone();
 
-    for (i, j) in visited {
-        let mut map = map.clone();
-        let mut guard = guard.clone();
+            map[i][j] = Field::Obstruction;
 
-        map[i][j] = Field::Obstruction;
+            loop {
+                let pos = &guard.pos;
+                let next = match &guard.direction {
+                    Direction::Up => (pos.0 - 1, pos.1),
+                    Direction::Down => (pos.0 + 1, pos.1),
+                    Direction::Right => (pos.0, pos.1 + 1),
+                    Direction::Left => (pos.0, pos.1 - 1),
+                };
 
-        loop {
-            let pos = &guard.pos;
-            let next = match &guard.direction {
-                Direction::Up => (pos.0 - 1, pos.1),
-                Direction::Down => (pos.0 + 1, pos.1),
-                Direction::Right => (pos.0, pos.1 + 1),
-                Direction::Left => (pos.0, pos.1 - 1),
-            };
-
-            if !((0..map.len() as i32).contains(&next.0)
-                && (0..map[0].len() as i32).contains(&next.1))
-            {
-                break;
-            }
-
-            match map[next.0 as usize][next.1 as usize] {
-                Field::Obstruction => guard.right(),
-                Field::Guard(direction) if { direction == guard.direction } => {
-                    acc += 1;
-                    break;
+                if !((0..map.len() as i32).contains(&next.0)
+                    && (0..map[0].len() as i32).contains(&next.1))
+                {
+                    return false;
                 }
-                Field::Empty | Field::Guard(_) => {
-                    map[next.0 as usize][next.1 as usize] = Field::Guard(guard.direction);
-                    guard.pos = next;
+
+                match map[next.0 as usize][next.1 as usize] {
+                    Field::Obstruction => guard.right(),
+                    Field::Guard(direction) if { direction == guard.direction } => {
+                        return true;
+                    }
+                    Field::Empty | Field::Guard(_) => {
+                        map[next.0 as usize][next.1 as usize] = Field::Guard(guard.direction);
+                        guard.pos = next;
+                    }
                 }
             }
-        }
-    }
-
-    acc
+        })
+        .count()
 }
 
 mod test {
