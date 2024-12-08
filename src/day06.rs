@@ -1,8 +1,10 @@
+use std::collections::HashSet;
+
 pub fn solve() {
     let input = std::fs::read_to_string("inputs/day06.txt").unwrap();
 
     println!("===== DAY 06 =====");
-    println!("Part 1: {}", part1(&input));
+    println!("Part 1: {}", part1(&input).0);
     println!("Part 2: {}", part2(&input));
 }
 
@@ -86,12 +88,13 @@ fn parse_input(input: &str) -> (Vec<Vec<Field>>, Guard) {
     (map, guard)
 }
 
-fn part1(input: &str) -> i32 {
+fn part1(input: &str) -> (i32, HashSet<(usize, usize)>) {
     let (mut map, mut guard) = parse_input(input);
 
     let mut acc = 1;
+    let mut visited = HashSet::new();
     loop {
-        let pos = &guard.pos;
+        let pos = guard.pos;
         let next = match &guard.direction {
             Direction::Up => (pos.0 - 1, pos.1),
             Direction::Down => (pos.0 + 1, pos.1),
@@ -99,13 +102,15 @@ fn part1(input: &str) -> i32 {
             Direction::Left => (pos.0, pos.1 - 1),
         };
 
-        // bruh
+        visited.insert((pos.0 as usize, pos.1 as usize));
+
         if !((0..map.len() as i32).contains(&next.0) && (0..map[0].len() as i32).contains(&next.1))
         {
             break;
         }
 
         map[pos.0 as usize][pos.1 as usize] = Field::Visited;
+
         match map[next.0 as usize][next.1 as usize] {
             Field::Obstruction => guard.right(),
             Field::Empty => {
@@ -120,56 +125,51 @@ fn part1(input: &str) -> i32 {
         }
     }
 
-    acc
+    (acc, visited)
 }
 
 fn part2(input: &str) -> i32 {
+    let visited = part1(input).1;
     let (map, guard) = parse_input(input);
 
     let mut acc = 0;
-    for i in 0..map.len() {
-        for j in 0..map[0].len() {
-            let mut map = map.clone();
-            let mut guard = guard.clone();
 
-            map[i][j] = match map[i][j] {
-                Field::Empty => Field::Obstruction,
-                _ => {
-                    continue;
-                }
+    for (i, j) in visited {
+        let mut map = map.clone();
+        let mut guard = guard.clone();
+
+        map[i][j] = Field::Obstruction;
+
+        loop {
+            let pos = &guard.pos;
+            let next = match &guard.direction {
+                Direction::Up => (pos.0 - 1, pos.1),
+                Direction::Down => (pos.0 + 1, pos.1),
+                Direction::Right => (pos.0, pos.1 + 1),
+                Direction::Left => (pos.0, pos.1 - 1),
             };
 
-            // check loop
-            loop {
-                let pos = &guard.pos;
-                let next = match &guard.direction {
-                    Direction::Up => (pos.0 - 1, pos.1),
-                    Direction::Down => (pos.0 + 1, pos.1),
-                    Direction::Right => (pos.0, pos.1 + 1),
-                    Direction::Left => (pos.0, pos.1 - 1),
-                };
+            if !((0..map.len() as i32).contains(&next.0)
+                && (0..map[0].len() as i32).contains(&next.1))
+            {
+                break;
+            }
 
-                if !((0..map.len() as i32).contains(&next.0)
-                    && (0..map[0].len() as i32).contains(&next.1))
-                {
+            match map[next.0 as usize][next.1 as usize] {
+                Field::Obstruction => guard.right(),
+                Field::Guard(direction) if { direction == guard.direction } => {
+                    acc += 1;
                     break;
                 }
-
-                match map[next.0 as usize][next.1 as usize] {
-                    Field::Obstruction => guard.right(),
-                    Field::Guard(direction) if { direction == guard.direction } => {
-                        acc += 1;
-                        break;
-                    }
-                    Field::Empty | Field::Guard(_) => {
-                        map[next.0 as usize][next.1 as usize] = Field::Guard(guard.direction);
-                        guard.pos = next;
-                    }
-                    _ => unreachable!(),
+                Field::Empty | Field::Guard(_) => {
+                    map[next.0 as usize][next.1 as usize] = Field::Guard(guard.direction);
+                    guard.pos = next;
                 }
+                _ => unreachable!(),
             }
         }
     }
+    // }
 
     acc
 }
@@ -190,7 +190,7 @@ mod test {
 
     #[test]
     fn part1() {
-        assert_eq!(super::part1(INPUT), 41);
+        assert_eq!(super::part1(INPUT).0, 41);
     }
 
     #[test]
