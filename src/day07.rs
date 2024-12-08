@@ -7,12 +7,9 @@ pub fn solve() {
 }
 
 fn check(res: i64, vals: &[i64], concat: bool) -> bool {
-    if res < 0 {
-        return false;
-    }
     match vals {
         [] => res == 0,
-        [..] if res == 0 => false,
+        _ if res <= 0 => false,
         [rest @ .., last] => {
             let c = concat && {
                 let t = 10i64.pow(last.ilog10() + 1);
