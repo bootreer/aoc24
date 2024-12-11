@@ -19,7 +19,7 @@ fn part1(input: &str) -> u64 {
         .map(|c| c.to_digit(10).unwrap() as u64)
         .enumerate()
         .flat_map(|(i, len)| {
-            let iter = (next..next + len);
+            let iter = next..next + len;
             next += len;
             if i % 2 == 0 {
                 iter.map(|idx| (idx, i / 2)).collect()
@@ -44,7 +44,7 @@ fn part2(input: &str) -> u64 {
     let mut idx = 0;
     let mut free_slots = vec![];
 
-    let mut blocks: Vec<_> = input
+    let blocks: Vec<_> = input
         .trim()
         .chars()
         .map(|c| c.to_digit(10).unwrap() as u64)
